@@ -4,7 +4,7 @@
 #   - 10 ms soft (half-sine) attack -> no click
 #   - low level (peak ~ -12 dBFS), the tail fades smoothly into silence
 # Options are written to sounds\; the chosen defaults are copied to done.wav / failed.wav.
-param([string]$Dir = $PSScriptRoot, [string]$Done = 'soft-duo', [string]$Fail = 'soft-fall')
+param([string]$Dir = $PSScriptRoot, [string]$Done = 'soft-duo', [string]$Fail = 'soft-fall', [string]$Wait = 'soft-tap')
 
 $code = @'
 using System;
@@ -60,8 +60,11 @@ $options = [ordered]@{
   'calm-arpeggio' = [Synth]::Render([double[][]]@(@(392.0,0,0.30,0.7,0,0), @(523.25,0.07,0.32,0.75,0,0), @(659.25,0.14,0.45,0.85,0,0)), 1.1, $peak, 0.012, 0.08)
   # failed: falling and soft: G5 -> D5
   'soft-fall'     = [Synth]::Render([double[][]]@(@(783.99,0,0.20,0.8,0,0), @(587.33,0.11,0.40,0.9,0,0)), 0.95, $peak, 0.010, 0.08)
+  # needs you: two quick, equal taps on D5, like a light knock
+  'soft-tap'      = [Synth]::Render([double[][]]@(@(587.33,0,0.10,0.8,0,0), @(587.33,0.14,0.26,0.85,0,0)), 0.8, $peak, 0.008, 0.06)
 }
 foreach ($name in $options.Keys) { [Synth]::Save("$out\$name.wav", $options[$name]) }
 Copy-Item "$out\$Done.wav" "$Dir\done.wav" -Force
 Copy-Item "$out\$Fail.wav" "$Dir\failed.wav" -Force
-"sounds ready: $($options.Keys -join ', ')  (done=$Done, failed=$Fail)"
+Copy-Item "$out\$Wait.wav" "$Dir\waiting.wav" -Force
+"sounds ready: $($options.Keys -join ', ')  (done=$Done, failed=$Fail, waiting=$Wait)"

@@ -12,13 +12,14 @@ function Ease([double]$x) { $lo = 0.0; $hi = 1.0
 $ys = @(for ($f = 0; $f -le 15; $f++) { [Math]::Round(70 * (1 - (Ease ($f / 15))), 2) })
 
 $cards = @(
-  @{ id = 'c1'; Title = 'Render finished';    Message = '120 frames ready · took 4 min 12 s'; Time = '21:34'; Failed = $false; App = 'Claude' },
-  @{ id = 'c2'; Title = 'Build failed';       Message = 'Exit code 1 · log: build.log';       Time = '21:36'; Failed = $true;  App = 'Codex' },
-  @{ id = 'c3'; Title = 'File move finished'; Message = 'Took 18 min · C: 212.4 GB free';     Time = '21:41'; Failed = $false; App = 'Claude' }
+  @{ id = 'c1'; Title = 'Render finished';    Message = '120 frames ready · took 4 min 12 s'; Time = '21:34'; Args = '';                            App = 'Claude' },
+  @{ id = 'c2'; Title = 'Permission needed';  Message = 'my-game · Bash';                     Time = '21:36'; Args = ' -Waiting';                   App = 'Claude' },
+  @{ id = 'c3'; Title = 'Uploading backup';   Message = '42% · 8 min left · 1.3 of 3 GB';     Time = '21:41'; Args = ' -State running -Percent 42'; App = 'Claude' },
+  @{ id = 'c4'; Title = 'Build failed';       Message = 'Exit code 1 · log: build.log';       Time = '21:38'; Args = ' -Failed';                    App = 'Codex' }
 )
 $inv = [Globalization.CultureInfo]::InvariantCulture
 foreach ($c in $cards) {
-  $f = if ($c.Failed) { ' -Failed' } else { '' }
+  $f = $c.Args
   $b64 = { param($s) "([Text.Encoding]::Unicode.GetString([Convert]::FromBase64String('$([Convert]::ToBase64String([Text.Encoding]::Unicode.GetBytes($s)))')))" }
   $inner = "& '$root\toast.ps1' -Title $(& $b64 $c.Title) -Message $(& $b64 $c.Message) -Time '$($c.Time)' -App '$($c.App)' -Preview '$tmp\$($c.id)' -PreviewY $(($ys | % { $_.ToString($inv) }) -join ',')$f"
   powershell -NoProfile -STA -ExecutionPolicy Bypass -EncodedCommand ([Convert]::ToBase64String([Text.Encoding]::Unicode.GetBytes($inner)))
@@ -52,7 +53,8 @@ function Compose($slots) {   # $slots: the frame file to draw in each slot, or $
 $last = { param($id) "$tmp\$id\frame015.png" }
 
 $hero = Compose @((& $last 'c1'), (& $last 'c2'), (& $last 'c3')); $hero.Save("$Out\screenshot.png", [Drawing.Imaging.ImageFormat]::Png); $hero.Dispose()
-Copy-Item (& $last 'c1') "$Out\card-done.png" -Force; Copy-Item (& $last 'c2') "$Out\card-failed.png" -Force
+Copy-Item (& $last 'c1') "$Out\card-done.png" -Force; Copy-Item (& $last 'c4') "$Out\card-failed.png" -Force
+Copy-Item (& $last 'c2') "$Out\card-waiting.png" -Force; Copy-Item (& $last 'c3') "$Out\card-progress.png" -Force
 
 # Animation frames (50 fps)
 $fd = "$tmp\gif"; New-Item -ItemType Directory $fd | Out-Null; $n = 0
