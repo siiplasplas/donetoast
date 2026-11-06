@@ -14,7 +14,7 @@ It can also follow a job live with a progress bar and the time left, and tell yo
 - **Looks right.** The size (283×70), radial background, colours, 44 px avatar and the 300 ms `cubic-bezier(0, .73, .48, 1)` slide-in were all measured from Steam's own client stylesheet.
 - **Stacks with no gaps.** Several cards sit directly on top of each other, flush against the taskbar and the right edge of the screen.
 - **No console flash.** Jobs are started with `ShowWindow = 0`, so no blue or black PowerShell window blinks on screen.
-- **Easy on the PC.** About 1 s of CPU when a card opens, then essentially zero. Memory is trimmed after the slide-in: about 10 MB working set instead of 140 MB while the card is open (a live card trims again every 30 s), and everything is freed when you click it away.
+- **Easy on the PC.** About 1 s of CPU when a card opens, then essentially zero. An open card uses about 10 MB of RAM (working set), a live progress card about 11 MB, and nothing once you click it away. Memory is trimmed right after the slide-in, and a live card trims again every 30 s.
 - **A soft sound instead of the Windows ding.** The chimes are synthesized locally and kept quiet, at about −12 dBFS, with no harsh overtones.
 - **Nothing to install.** It uses the PowerShell 5.1 and WPF that ship with Windows 10 and 11.
 
