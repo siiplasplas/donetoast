@@ -26,11 +26,29 @@ It can also follow a job live with a progress bar and the time left, and tell yo
 
 ## Install
 
+Run this in PowerShell, then restart Claude Code:
+
+```powershell
+irm https://raw.githubusercontent.com/siiplasplas/donetoast/main/install.ps1 | iex
+```
+
+`install.ps1` does the following:
+- Downloads donetoast to `$HOME\donetoast`.
+- Adds the [Claude Code hooks](#using-it-with-claude-code-or-codex) to `~/.claude/settings.json`. Your own hooks stay as they are, and a backup is saved next to the file.
+- Adds one line to `~/.claude/CLAUDE.md`, and to `~/.codex/AGENTS.md` if you use Codex, so the agent notifies you when a long task ends.
+- Shows a test card.
+
+Running it again is safe. `install.ps1 -Uninstall` removes the hooks and the lines again.
+
+**Let your agent do it.** You can also paste this to Claude Code or Codex:
+
+> Install https://github.com/siiplasplas/donetoast for me: clone it to `$HOME\donetoast` and run its `install.ps1` (outside the sandbox).
+
+**By hand.** Clone the repository anywhere and add the hooks yourself (see below). The scripts find their files relative to themselves.
+
 ```powershell
 git clone https://github.com/siiplasplas/donetoast "$HOME\donetoast"
 ```
-
-Any folder works; the scripts find their files relative to themselves.
 
 ## Usage
 
@@ -141,6 +159,7 @@ If the agent runs in a sandbox, it has to run this command with the sandbox turn
 | `toast.ps1` | The card itself (WPF window, animation, sound) |
 | `job-runner.ps1` | Runs a job and calls `toast.ps1` when it ends |
 | `claude-hook.ps1`, `claude-clear.cmd` | Claude Code hooks for the "needs you" card |
+| `install.ps1` | Sets up the hooks and the agent instructions; `-Uninstall` undoes it |
 | `make-sounds.ps1` | Sound synthesizer |
 | `tools\` | Icon and README image generators |
 
