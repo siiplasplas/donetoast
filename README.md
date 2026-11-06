@@ -1,12 +1,25 @@
+<div align="center">
+
 # donetoast
 
-**A lightweight "job finished" notification for Windows, styled after Steam's friend toasts.**
-When a long job finishes (a build, a render, a file move, a Claude Code or Codex task), a small card slides up from the bottom-right corner, right above the taskbar, with a soft chime.
-It can also follow a job live with a progress bar and the time left, and tell you when Claude Code is waiting for your answer.
+**Steam-style notification cards for Windows.**<br>
+Know when a long job or a Claude Code / Codex task finishes, watch it live, and get pinged when the agent needs you.
 
-![Three stacked notifications above the taskbar](docs/screenshot.png)
+[![Windows 10/11](https://img.shields.io/badge/Windows-10%20%7C%2011-0078D4?logo=windows&logoColor=white)](#install)
+[![PowerShell 5.1](https://img.shields.io/badge/PowerShell-5.1-5391FE?logo=powershell&logoColor=white)](#install)
+[![Claude Code hooks](https://img.shields.io/badge/Claude%20Code-hooks-D97757)](#using-it-with-claude-code-or-codex)
+[![Release](https://img.shields.io/github/v/release/siiplasplas/donetoast?color=2ea043)](https://github.com/siiplasplas/donetoast/releases)
+[![MIT](https://img.shields.io/github/license/siiplasplas/donetoast?color=8b949e)](LICENSE)
 
-![Cards sliding in one after another](docs/animation.gif)
+<img src="docs/demo.gif" width="760" alt="A 'needs you' card appears, clears when you answer, then a progress card fills up and turns into a done card">
+
+</div>
+
+```powershell
+irm https://raw.githubusercontent.com/siiplasplas/donetoast/main/install.ps1 | iex
+```
+
+One line in PowerShell sets up the Claude Code hooks and shows a test card. Nothing else to install. [More about the installer](#install).
 
 ## Why
 
@@ -145,11 +158,23 @@ Click a card to dismiss it. To make cards close on their own, call `toast.ps1` d
 
 If the agent runs in a sandbox, it has to run this command with the sandbox turned off; otherwise the card can't open on your desktop.
 
+## FAQ
+
+**Does it work on macOS or Linux?** No. It is built on WPF, which only exists on Windows.
+
+**Do I need admin rights?** No. Everything runs as your user, and the installer only writes inside your home folder.
+
+**Will Focus Assist / Do Not Disturb hide it?** No. The cards are their own small windows, not Windows notifications, so they show up either way.
+
+**Does it send anything over the network?** No. Only `install.ps1` talks to GitHub, to download the files.
+
+**How do I remove it?** Run `install.ps1 -Uninstall` from the donetoast folder, then delete the folder.
+
 ## Customising
 
 - **Icon.** Drop a 256 px PNG into `icons\` named after the `-App` value, for example `icons\myapp.png`. Apps with no icon fall back to `icon.png`.
 - **Sound.** Run `make-sounds.ps1` to regenerate the chimes. Alternatives are in `sounds\`: `soft-duo` (default), `bubble`, `calm-arpeggio`, `soft-fall` (default for failures), `soft-tap` (default for "needs you"). To switch, run for example `make-sounds.ps1 -Done bubble -Wait calm-arpeggio`. Running cards make no sound.
-- **README images.** Run `tools\make-previews.ps1` to rebuild `docs\`. It renders the cards off-screen onto a fake desktop and never takes a real screenshot, so nothing from your screen ends up in the images.
+- **README images.** Run `tools\make-previews.ps1` to rebuild `docs\` (the demo GIF included). It renders the cards off-screen onto a fake desktop and never takes a real screenshot, so nothing from your screen ends up in the images.
 
 ## Files
 
