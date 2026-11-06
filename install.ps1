@@ -1,4 +1,4 @@
-﻿# Installs donetoast for Claude Code (and Codex, if it is installed). Safe to run more than once.
+# Installs donetoast for Claude Code (and Codex, if it is installed). Safe to run more than once.
 #   irm https://raw.githubusercontent.com/siiplasplas/donetoast/main/install.ps1 | iex
 #   .\install.ps1 -Uninstall      removes the hooks and the instruction lines (the files stay)
 # What it does:
