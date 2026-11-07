@@ -77,11 +77,17 @@ if (-not $NoHooks) {
   if (-not $cfg.hooks) { $cfg | Add-Member hooks (New-Object psobject) -Force }
   $hk = $cfg.hooks
   $notify = "powershell -NoProfile -ExecutionPolicy Bypass -File `"$fwd/claude-hook.ps1`" notify"
+  $permission = "powershell -NoProfile -ExecutionPolicy Bypass -File `"$fwd/claude-hook.ps1`" permission"
   $clear = "`"$fwd/claude-clear.cmd`""
+  # async: Claude does not wait for these, so they never slow it down
+  $cmd = { param($c, $t) [pscustomobject]@{ type = 'command'; command = $c; timeout = $t; async = $true } }
   $want = [ordered]@{
-    Notification     = [pscustomobject]@{ matcher = 'permission_prompt|idle_prompt|elicitation_dialog'; hooks = @([pscustomobject]@{ type = 'command'; command = $notify; timeout = 15 }) }
-    UserPromptSubmit = [pscustomobject]@{ hooks = @([pscustomobject]@{ type = 'command'; command = $clear; timeout = 10 }) }
-    Stop             = [pscustomobject]@{ hooks = @([pscustomobject]@{ type = 'command'; command = $clear; timeout = 10 }) }
+    PermissionRequest  = [pscustomobject]@{ matcher = '*'; hooks = @(& $cmd $permission 15) }
+    Notification       = [pscustomobject]@{ matcher = 'permission_prompt|idle_prompt|elicitation_dialog'; hooks = @(& $cmd $notify 15) }
+    PostToolUse        = [pscustomobject]@{ matcher = '*'; hooks = @(& $cmd $clear 10) }
+    PostToolUseFailure = [pscustomobject]@{ matcher = '*'; hooks = @(& $cmd $clear 10) }
+    UserPromptSubmit   = [pscustomobject]@{ hooks = @(& $cmd $clear 10) }
+    Stop               = [pscustomobject]@{ hooks = @(& $cmd $clear 10) }
   }
   foreach ($ev in $want.Keys) {
     $groups = @(@(foreach ($g in @($hk.$ev)) { if ($g) { Without-Ours $g } }) | Where-Object { $_ })   # drop older donetoast hooks, keep everything else

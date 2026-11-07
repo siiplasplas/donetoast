@@ -135,18 +135,29 @@ Click a card to dismiss it. To make cards close on their own, call `toast.ps1` d
 
 ### Using it with Claude Code or Codex
 
-**Know when Claude is waiting for you.** Add these hooks to `~/.claude/settings.json`, merged into any `hooks` you already have. A "needs you" card appears when Claude asks for permission or has been waiting for your reply. You don't have to dismiss it: the `clear` hooks remove it when you send your next message or when Claude's turn ends. When no card is open, `claude-clear.cmd` returns in about 0.1 s, so it adds no noticeable delay.
+**Know when Claude is waiting for you.** Add these hooks to `~/.claude/settings.json`, merged into any `hooks` you already have. The installer does this for you.
+
+- **Permission prompts show up instantly** and say what is being asked, for example `my-game · Bash: npm test`. This comes from the `PermissionRequest` hook, which fires the moment the dialog opens. The `Notification` event arrives about 6 s later and is only a fallback.
+- **"Waiting for your reply"** (`idle_prompt`) appears when Claude has finished and you haven't answered for about a minute.
+- **You never dismiss it yourself.** Once you approve, the card clears as soon as that tool has run (`PostToolUse` / `PostToolUseFailure`). Everything else clears when you send your next message or Claude's turn ends. If you deny a prompt, Claude Code fires no event for that, so the card goes away at the end of the turn.
+- **No slowdown.** All hooks are `async`, so Claude doesn't wait for them, and `claude-clear.cmd` only starts PowerShell when a card is actually open.
 
 ```json
 {
   "hooks": {
+    "PermissionRequest": [
+      { "matcher": "*", "hooks": [{ "type": "command", "async": true, "timeout": 15,
+          "command": "powershell -NoProfile -ExecutionPolicy Bypass -File \"C:/Users/YOU/donetoast/claude-hook.ps1\" permission" }] }
+    ],
     "Notification": [
       { "matcher": "permission_prompt|idle_prompt|elicitation_dialog",
-        "hooks": [{ "type": "command", "timeout": 15,
+        "hooks": [{ "type": "command", "async": true, "timeout": 15,
           "command": "powershell -NoProfile -ExecutionPolicy Bypass -File \"C:/Users/YOU/donetoast/claude-hook.ps1\" notify" }] }
     ],
-    "UserPromptSubmit": [ { "hooks": [{ "type": "command", "timeout": 10, "command": "C:/Users/YOU/donetoast/claude-clear.cmd" }] } ],
-    "Stop":             [ { "hooks": [{ "type": "command", "timeout": 10, "command": "C:/Users/YOU/donetoast/claude-clear.cmd" }] } ]
+    "PostToolUse":        [ { "matcher": "*", "hooks": [{ "type": "command", "async": true, "timeout": 10, "command": "\"C:/Users/YOU/donetoast/claude-clear.cmd\"" }] } ],
+    "PostToolUseFailure": [ { "matcher": "*", "hooks": [{ "type": "command", "async": true, "timeout": 10, "command": "\"C:/Users/YOU/donetoast/claude-clear.cmd\"" }] } ],
+    "UserPromptSubmit":   [ { "hooks": [{ "type": "command", "async": true, "timeout": 10, "command": "\"C:/Users/YOU/donetoast/claude-clear.cmd\"" }] } ],
+    "Stop":               [ { "hooks": [{ "type": "command", "async": true, "timeout": 10, "command": "\"C:/Users/YOU/donetoast/claude-clear.cmd\"" }] } ]
   }
 }
 ```
